@@ -1,5 +1,3 @@
-#pragma warning disable CS1591
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -15,17 +13,23 @@ using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
+namespace Jellyfin.Plugin.Tmdb.Providers.Movies
 {
     /// <summary>
-    /// Class MovieDbProvider.
+    /// Tmdb movie provider.
     /// </summary>
-    public class TmdbMovieProvider : IRemoteMetadataProvider<Movie, MovieInfo>, IHasOrder
+    public class TmdbMovieProvider : IRemoteMetadataProvider<Movie, MovieInfo>
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILibraryManager _libraryManager;
         private readonly TmdbClientManager _tmdbClientManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TmdbMovieProvider"/> class.
+        /// </summary>
+        /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
+        /// <param name="tmdbClientManager">Instance of the <see cref="TmdbClientManager"/>.</param>
+        /// <param name="httpClientFactory">Instance of the <see cref="IHttpClientFactory"/> interface.</param>
         public TmdbMovieProvider(
             ILibraryManager libraryManager,
             TmdbClientManager tmdbClientManager,
@@ -36,11 +40,10 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
             _httpClientFactory = httpClientFactory;
         }
 
+        /// <inheritdoc />
         public string Name => TmdbUtils.ProviderName;
 
         /// <inheritdoc />
-        public int Order => 1;
-
         public async Task<IEnumerable<RemoteSearchResult>> GetSearchResults(MovieInfo searchInfo, CancellationToken cancellationToken)
         {
             var tmdbId = Convert.ToInt32(searchInfo.GetProviderId(MetadataProvider.Tmdb), CultureInfo.InvariantCulture);
@@ -77,6 +80,11 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
                 .GetMovieAsync(tmdbId, searchInfo.MetadataLanguage, TmdbUtils.GetImageLanguagesParam(searchInfo.MetadataLanguage), cancellationToken)
                 .ConfigureAwait(false);
 
+            if (movie == null)
+            {
+                return Enumerable.Empty<RemoteSearchResult>();
+            }
+
             var remoteResult = new RemoteSearchResult
             {
                 Name = movie.Title ?? movie.OriginalTitle,
@@ -102,7 +110,8 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
             return new[] { remoteResult };
         }
 
-        public async Task<MetadataResult<Movie>> GetMetadata(MovieInfo info, CancellationToken cancellationToken)
+        /// <inheritdoc />
+        public async Task<MetadataResult<Movie>?> GetMetadata(MovieInfo info, CancellationToken cancellationToken)
         {
             var tmdbId = info.GetProviderId(MetadataProvider.Tmdb);
             var imdbId = info.GetProviderId(MetadataProvider.Imdb);
@@ -122,12 +131,17 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
 
             if (string.IsNullOrEmpty(tmdbId))
             {
-                return new MetadataResult<Movie>();
+                return null;
             }
 
             var movieResult = await _tmdbClientManager
                 .GetMovieAsync(Convert.ToInt32(tmdbId, CultureInfo.InvariantCulture), info.MetadataLanguage, TmdbUtils.GetImageLanguagesParam(info.MetadataLanguage), cancellationToken)
                 .ConfigureAwait(false);
+
+            if (movieResult == null)
+            {
+                return null;
+            }
 
             var movie = new Movie
             {
@@ -266,7 +280,6 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
                 }
             }
 
-
             if (movieResult.Videos?.Results != null)
             {
                 var trailers = new List<MediaUrl>();
@@ -294,7 +307,7 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
         /// <inheritdoc />
         public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
         {
-            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(url, cancellationToken);
+            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(new Uri(url), cancellationToken);
         }
     }
 }

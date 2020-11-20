@@ -1,5 +1,3 @@
-#pragma warning disable CS1591
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,45 +14,51 @@ using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Extensions;
 using MediaBrowser.Model.Providers;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.TV
+namespace Jellyfin.Plugin.Tmdb.Providers.TV
 {
-    public class TmdbSeriesImageProvider : IRemoteImageProvider, IHasOrder
+    /// <summary>
+    /// Tmdb series image provider.
+    /// </summary>
+    public class TmdbSeriesImageProvider : IRemoteImageProvider
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly TmdbClientManager _tmdbClientManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TmdbSeriesImageProvider"/> class.
+        /// </summary>
+        /// <param name="httpClientFactory">Instance of the <see cref="IHttpClientFactory"/> interface.</param>
+        /// <param name="tmdbClientManager">Instance of the <see cref="TmdbClientManager"/>.</param>
         public TmdbSeriesImageProvider(IHttpClientFactory httpClientFactory, TmdbClientManager tmdbClientManager)
         {
             _httpClientFactory = httpClientFactory;
             _tmdbClientManager = tmdbClientManager;
         }
 
+        /// <inheritdoc />
         public string Name => TmdbUtils.ProviderName;
 
-        // After tvdb and fanart
-        public int Order => 2;
-
+        /// <inheritdoc />
         public bool Supports(BaseItem item)
         {
             return item is Series;
         }
 
+        /// <inheritdoc />
         public IEnumerable<ImageType> GetSupportedImages(BaseItem item)
         {
-            return new List<ImageType>
-            {
-                ImageType.Primary,
-                ImageType.Backdrop
-            };
+            yield return ImageType.Primary;
+            yield return ImageType.Backdrop;
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken)
         {
             var tmdbId = item.GetProviderId(MetadataProvider.Tmdb);
 
             if (string.IsNullOrEmpty(tmdbId))
             {
-                return null;
+                return Enumerable.Empty<RemoteImageInfo>();
             }
 
             var language = item.GetPreferredMetadataLanguage();
@@ -109,9 +113,10 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.TV
             return remoteImages.OrderByLanguageDescending(language);
         }
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
         {
-            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(url, cancellationToken);
+            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(new Uri(url), cancellationToken);
         }
     }
 }

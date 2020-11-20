@@ -1,5 +1,3 @@
-#pragma warning disable CS1591
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,26 +12,36 @@ using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.TV
+namespace Jellyfin.Plugin.Tmdb.Providers.TV
 {
+    /// <summary>
+    /// Tmdb season provider.
+    /// </summary>
     public class TmdbSeasonProvider : IRemoteMetadataProvider<Season, SeasonInfo>
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly TmdbClientManager _tmdbClientManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TmdbSeasonProvider"/> class.
+        /// </summary>
+        /// <param name="httpClientFactory">Instance of the <see cref="IHttpClientFactory"/> interface.</param>
+        /// <param name="tmdbClientManager">Instance of the <see cref="TmdbClientManager"/>.</param>
         public TmdbSeasonProvider(IHttpClientFactory httpClientFactory, TmdbClientManager tmdbClientManager)
         {
             _httpClientFactory = httpClientFactory;
             _tmdbClientManager = tmdbClientManager;
         }
 
+        /// <inheritdoc />
         public string Name => TmdbUtils.ProviderName;
 
+        /// <inheritdoc />
         public async Task<MetadataResult<Season>> GetMetadata(SeasonInfo info, CancellationToken cancellationToken)
         {
             var result = new MetadataResult<Season>();
 
-            info.SeriesProviderIds.TryGetValue(MetadataProvider.Tmdb.ToString(), out string seriesTmdbId);
+            info.SeriesProviderIds.TryGetValue(MetadataProvider.Tmdb.ToString(), out var seriesTmdbId);
 
             var seasonNumber = info.IndexNumber;
 
@@ -56,7 +64,7 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.TV
             {
                 Name = info.Name,
                 IndexNumber = seasonNumber,
-                Overview = seasonResult?.Overview
+                Overview = seasonResult.Overview
             };
 
             if (!string.IsNullOrEmpty(seasonResult.ExternalIds?.TvdbId))
@@ -109,14 +117,16 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.TV
             return result;
         }
 
+        /// <inheritdoc />
         public Task<IEnumerable<RemoteSearchResult>> GetSearchResults(SeasonInfo searchInfo, CancellationToken cancellationToken)
         {
             return Task.FromResult(Enumerable.Empty<RemoteSearchResult>());
         }
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
         {
-            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(url, cancellationToken);
+            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(new Uri(url), cancellationToken);
         }
     }
 }

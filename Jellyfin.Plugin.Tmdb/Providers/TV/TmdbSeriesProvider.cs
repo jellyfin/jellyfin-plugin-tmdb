@@ -1,5 +1,3 @@
-#pragma warning disable CS1591
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -17,13 +15,21 @@ using TMDbLib.Objects.Find;
 using TMDbLib.Objects.Search;
 using TMDbLib.Objects.TvShows;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.TV
+namespace Jellyfin.Plugin.Tmdb.Providers.TV
 {
-    public class TmdbSeriesProvider : IRemoteMetadataProvider<Series, SeriesInfo>, IHasOrder
+    /// <summary>
+    /// Tmdb series provider.
+    /// </summary>
+    public class TmdbSeriesProvider : IRemoteMetadataProvider<Series, SeriesInfo>
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly TmdbClientManager _tmdbClientManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TmdbSeriesProvider"/> class.
+        /// </summary>
+        /// <param name="httpClientFactory">Instance of the <see cref="IHttpClientFactory"/> interface.</param>
+        /// <param name="tmdbClientManager">Instance of the <see cref="TmdbClientManager"/>.</param>
         public TmdbSeriesProvider(
             IHttpClientFactory httpClientFactory,
             TmdbClientManager tmdbClientManager)
@@ -33,13 +39,12 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.TV
             Current = this;
         }
 
+        /// <inheritdoc />
         public string Name => TmdbUtils.ProviderName;
 
-        // After TheTVDB
-        public int Order => 1;
+        internal static TmdbSeriesProvider? Current { get; private set; }
 
-        internal static TmdbSeriesProvider Current { get; private set; }
-
+        /// <inheritdoc />
         public async Task<IEnumerable<RemoteSearchResult>> GetSearchResults(SeriesInfo searchInfo, CancellationToken cancellationToken)
         {
             var tmdbId = searchInfo.GetProviderId(MetadataProvider.Tmdb);
@@ -161,7 +166,8 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.TV
             return remoteResult;
         }
 
-        public async Task<MetadataResult<Series>> GetMetadata(SeriesInfo info, CancellationToken cancellationToken)
+        /// <inheritdoc />
+        public async Task<MetadataResult<Series>?> GetMetadata(SeriesInfo info, CancellationToken cancellationToken)
         {
             var result = new MetadataResult<Series>
             {
@@ -218,6 +224,11 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.TV
                 var tvShow = await _tmdbClientManager
                     .GetSeriesAsync(Convert.ToInt32(tmdbId, CultureInfo.InvariantCulture), info.MetadataLanguage, TmdbUtils.GetImageLanguagesParam(info.MetadataLanguage), cancellationToken)
                     .ConfigureAwait(false);
+
+                if (tvShow == null)
+                {
+                    return null;
+                }
 
                 result = new MetadataResult<Series>
                 {
@@ -390,9 +401,10 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.TV
             }
         }
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
         {
-            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(url, cancellationToken);
+            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(new Uri(url), cancellationToken);
         }
     }
 }

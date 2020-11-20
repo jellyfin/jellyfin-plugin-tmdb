@@ -3,7 +3,7 @@ using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.People
+namespace Jellyfin.Plugin.Tmdb.Providers.People
 {
     /// <summary>
     /// External ID for a TMDB person.

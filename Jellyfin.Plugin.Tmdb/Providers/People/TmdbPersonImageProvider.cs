@@ -1,5 +1,3 @@
-#pragma warning disable CS1591
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -14,13 +12,21 @@ using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Extensions;
 using MediaBrowser.Model.Providers;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.People
+namespace Jellyfin.Plugin.Tmdb.Providers.People
 {
-    public class TmdbPersonImageProvider : IRemoteImageProvider, IHasOrder
+    /// <summary>
+    /// Tmdb person image provider.
+    /// </summary>
+    public class TmdbPersonImageProvider : IRemoteImageProvider
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly TmdbClientManager _tmdbClientManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TmdbPersonImageProvider"/> class.
+        /// </summary>
+        /// <param name="httpClientFactory">Instance of the <see cref="IHttpClientFactory"/> interface.</param>
+        /// <param name="tmdbClientManager">Instance of the <see cref="TmdbClientManager"/>.</param>
         public TmdbPersonImageProvider(IHttpClientFactory httpClientFactory, TmdbClientManager tmdbClientManager)
         {
             _httpClientFactory = httpClientFactory;
@@ -31,21 +37,18 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.People
         public string Name => TmdbUtils.ProviderName;
 
         /// <inheritdoc />
-        public int Order => 0;
-
         public bool Supports(BaseItem item)
         {
             return item is Person;
         }
 
+        /// <inheritdoc />
         public IEnumerable<ImageType> GetSupportedImages(BaseItem item)
         {
-            return new List<ImageType>
-            {
-                ImageType.Primary
-            };
+            yield return ImageType.Primary;
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken)
         {
             var person = (Person)item;
@@ -82,9 +85,10 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.People
             return Enumerable.Empty<RemoteImageInfo>();
         }
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
         {
-            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(url, cancellationToken);
+            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(new Uri(url), cancellationToken);
         }
     }
 }

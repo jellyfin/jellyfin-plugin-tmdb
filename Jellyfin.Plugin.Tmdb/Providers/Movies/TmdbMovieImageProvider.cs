@@ -1,5 +1,3 @@
-#pragma warning disable CS1591
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -17,37 +15,44 @@ using MediaBrowser.Model.Extensions;
 using MediaBrowser.Model.Providers;
 using TMDbLib.Objects.Find;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
+namespace Jellyfin.Plugin.Tmdb.Providers.Movies
 {
-    public class TmdbMovieImageProvider : IRemoteImageProvider, IHasOrder
+    /// <summary>
+    /// Tmdb movie image provider.
+    /// </summary>
+    public class TmdbMovieImageProvider : IRemoteImageProvider
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly TmdbClientManager _tmdbClientManager;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TmdbMovieImageProvider"/> class.
+        /// </summary>
+        /// <param name="httpClientFactory">Instance of the <see cref="IHttpClientFactory"/> interface.</param>
+        /// <param name="tmdbClientManager">Instance of the <see cref="TmdbClientManager"/>.</param>
         public TmdbMovieImageProvider(IHttpClientFactory httpClientFactory, TmdbClientManager tmdbClientManager)
         {
             _httpClientFactory = httpClientFactory;
             _tmdbClientManager = tmdbClientManager;
         }
 
-        public int Order => 0;
-
+        /// <inheritdoc />
         public string Name => TmdbUtils.ProviderName;
 
+        /// <inheritdoc />
         public bool Supports(BaseItem item)
         {
             return item is Movie || item is Trailer;
         }
 
+        /// <inheritdoc />
         public IEnumerable<ImageType> GetSupportedImages(BaseItem item)
         {
-            return new List<ImageType>
-            {
-                ImageType.Primary,
-                ImageType.Backdrop
-            };
+            yield return ImageType.Primary;
+            yield return ImageType.Backdrop;
         }
 
+        /// <inheritdoc />
         public async Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken)
         {
             var language = item.GetPreferredMetadataLanguage();
@@ -120,9 +125,10 @@ namespace MediaBrowser.Providers.Plugins.Tmdb.Movies
             return remoteImages.OrderByLanguageDescending(language);
         }
 
+        /// <inheritdoc />
         public Task<HttpResponseMessage> GetImageResponse(string url, CancellationToken cancellationToken)
         {
-            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(url, cancellationToken);
+            return _httpClientFactory.CreateClient(NamedClient.Default).GetAsync(new Uri(url), cancellationToken);
         }
     }
 }

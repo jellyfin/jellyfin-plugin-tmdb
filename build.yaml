@@ -1,15 +1,15 @@
 ---
-name: "TheTVDB"
-guid: "a677c0da-fac5-4cde-941a-7134223f14c8"
+name: "TheMovieDb"
+guid: "963FD785-53E7-440C-80BD-71661BE1B7DF"
 version: "1.0.0.0"
 targetAbi: "10.7.0.0"
 owner: "jellyfin"
-overview: "Get TV metadata from TheTvdb"
+overview: "Get metadata from TheMovieDb"
 description: >
-  Get TV metadata from TheTvdb
+  Get metadata from TheMovieDb
 category: "Metadata"
 artifacts:
-- "Jellyfin.Plugins.TheTvdb.dll"
-- "TvDbSharper.dll"
+- "Jellyfin.Plugins.Tmdb.dll"
+- "TMDbLib.dll"
 changelog: >
   Remove from Jellyfin core.

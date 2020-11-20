@@ -3,7 +3,7 @@ using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
 
-namespace MediaBrowser.Providers.Plugins.Tmdb.TV
+namespace Jellyfin.Plugin.Tmdb.Providers.TV
 {
     /// <summary>
     /// External ID for a TMDB series.
