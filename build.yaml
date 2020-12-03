@@ -3,6 +3,7 @@ name: "TheMovieDb"
 guid: "963FD785-53E7-440C-80BD-71661BE1B7DF"
 version: "1.0.0.0"
 targetAbi: "10.7.0.0"
+framework: "net5.0"
 owner: "jellyfin"
 overview: "Get metadata from TheMovieDb"
 description: >
