@@ -10,7 +10,7 @@ description: >
   Get metadata from TheMovieDb
 category: "Metadata"
 artifacts:
-- "Jellyfin.Plugins.Tmdb.dll"
+- "Jellyfin.Plugin.Tmdb.dll"
 - "TMDbLib.dll"
 changelog: >
   Remove from Jellyfin core.
