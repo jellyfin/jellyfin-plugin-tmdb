@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -93,14 +94,14 @@ namespace Jellyfin.Plugin.Tmdb.Providers.People
         }
 
         /// <inheritdoc />
-        public async Task<MetadataResult<Person>?> GetMetadata(PersonLookupInfo id, CancellationToken cancellationToken)
+        public async Task<MetadataResult<Person>?> GetMetadata(PersonLookupInfo info, CancellationToken cancellationToken)
         {
-            var personTmdbId = Convert.ToInt32(id.GetProviderId(MetadataProvider.Tmdb), CultureInfo.InvariantCulture);
+            var personTmdbId = Convert.ToInt32(info.GetProviderId(MetadataProvider.Tmdb), CultureInfo.InvariantCulture);
 
             // We don't already have an Id, need to fetch it
             if (personTmdbId <= 0)
             {
-                var personSearchResults = await _tmdbClientManager.SearchPersonAsync(id.Name, cancellationToken).ConfigureAwait(false);
+                var personSearchResults = await _tmdbClientManager.SearchPersonAsync(info.Name, cancellationToken).ConfigureAwait(false);
                 if (personSearchResults.Count > 0)
                 {
                     personTmdbId = personSearchResults[0].Id;
@@ -123,7 +124,7 @@ namespace Jellyfin.Plugin.Tmdb.Providers.People
                 {
                     // Take name from incoming info, don't rename the person
                     // TODO: This should go in PersonMetadataService, not each person provider
-                    Name = id.Name,
+                    Name = info.Name,
                     HomePageUrl = person.Homepage,
                     Overview = person.Biography,
                     PremiereDate = person.Birthday?.ToUniversalTime(),

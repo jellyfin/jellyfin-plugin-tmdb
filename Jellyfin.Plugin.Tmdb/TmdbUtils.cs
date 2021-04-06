@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using MediaBrowser.Model.Entities;
 using TMDbLib.Objects.General;
 
@@ -45,6 +46,7 @@ namespace Jellyfin.Plugin.Tmdb
         /// </summary>
         /// <param name="crew">Crew member to map against the Jellyfin person types.</param>
         /// <returns>The Jellyfin person type.</returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1309: Use ordinal StringComparison", Justification = "AFAIK we WANT InvariantCulture comparisons here and not Ordinal")]
         public static string MapCrewToPersonType(Crew crew)
         {
             if (crew.Department.Equals("production", StringComparison.InvariantCultureIgnoreCase)
