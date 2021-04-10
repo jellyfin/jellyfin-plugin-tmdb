@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Net.Http;
@@ -85,14 +86,14 @@ namespace Jellyfin.Plugin.Tmdb.Providers.BoxSets
         }
 
         /// <inheritdoc />
-        public async Task<MetadataResult<BoxSet>> GetMetadata(BoxSetInfo id, CancellationToken cancellationToken)
+        public async Task<MetadataResult<BoxSet>> GetMetadata(BoxSetInfo info, CancellationToken cancellationToken)
         {
-            var tmdbId = Convert.ToInt32(id.GetProviderId(MetadataProvider.Tmdb), CultureInfo.InvariantCulture);
-            var language = id.MetadataLanguage;
+            var tmdbId = Convert.ToInt32(info.GetProviderId(MetadataProvider.Tmdb), CultureInfo.InvariantCulture);
+            var language = info.MetadataLanguage;
             // We don't already have an Id, need to fetch it
             if (tmdbId <= 0)
             {
-                var searchResults = await _tmdbClientManager.SearchCollectionAsync(id.Name, language, cancellationToken).ConfigureAwait(false);
+                var searchResults = await _tmdbClientManager.SearchCollectionAsync(info.Name, language, cancellationToken).ConfigureAwait(false);
 
                 if (searchResults != null && searchResults.Count > 0)
                 {
